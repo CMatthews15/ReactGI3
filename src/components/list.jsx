@@ -1,73 +1,65 @@
-import React from 'react'
-import { useState } from 'react'
+import React, { useState } from 'react';
+import { Link } from 'react-router-dom';
 
-function Tasklist() {
-    const [todos, setTodos] = useState([])
-    const [inputValue, setInputValue] = useState('')
-    const [description, setDescription] = useState('')
-    const [completed, setCompleted] = useState(['']);
+const TaskList = ({ tasks, setTasks }) => {
+    const [newTask, setNewTask] = useState({ text: '', details: '' });
 
-    function handleChange(e) {
-        setInputValue(e.target.value)
-    }
-    function handleDesc(e) {
-        setDescription(e.target.value)
-    }
-
-    function handleSubmit(e) {
-        e.preventDefault()
-        if (!inputValue || !description) {
-            return alert('please input your todoList')
-        } else {
-            setTodos([...todos, [inputValue, description]])
-            setInputValue('')
-            setDescription('')
-            console.log(todos)
-        }
-    }
-
-    const handleDelete = (index) => {
-        const newTodos = [...todos];
-        newTodos.splice(index, 1);
-        setTodos(newTodos);
+    const handleDelete = (id) => {
+        setTasks(tasks.filter((task) => task.id !== id));
     };
-    const handleEdit = (todo) => {
-        handleDelete(todos.indexOf(todo));
-        setInputValue(todo[0]);
-        setDescription(todo[1]);
-    };
-    const handleComplete = (index) => {
-        if (completed.includes(index)) {
-            setCompleted(completed.filter((i) => i !== index));
-        } else {
-            setCompleted([...completed, index]);
+
+    const handleAddTask = () => {
+        if (newTask.text.trim() !== '') {
+            setTasks([
+                ...tasks,
+                {
+                    id: tasks.length + 1,
+                    ...newTask,
+                },
+            ]);
+            setNewTask({ text: '', details: '' });
         }
-    }
+    };
+
+    const handleChange = (e) => {
+        setNewTask({ ...newTask, [e.target.name]: e.target.value });
+    };
 
     return (
         <div>
-            <form className='addTask'>
-                <h1>Todo List</h1>
-                <label htmlFor='title'>Title</label>
-                <input type='text' value={inputValue} onChange={handleChange} name='title' id='title' />
-                <label htmlFor='description'>Description</label>
-                <input type='text' value={description} onChange={handleDesc} name='Description' id='Description' />
-                <button onClick={handleSubmit}>Add Todo</button>
-            </form>
-
-            <section className='taskGrid'>
-                {todos.map((todo, index) => (
-                    <section key={index} className={`todoTask ${completed.includes(index) ? 'completed' : ''}`}>
-                        <h4>Title {index}: {todo[0]}</h4>
-                        <h5>Description: {todo[1]}</h5>
-                        <button onClick={() => handleDelete(index)}>Delete</button>
-                        <button onClick={() => handleEdit(todo)}>Edit</button>
-                        <button onClick={() => handleComplete(index)}>Completed</button>
-                    </section>
+            <h2>Task List</h2>
+            <ul>
+                {tasks.map((task) => (
+                    <li key={task.id}>
+                        {task.text}{' '}
+                        <Link to={`/tasks/${task.id}`}>Details</Link>{' '}
+                        <button onClick={() => handleDelete(task.id)}>Delete</button>
+                    </li>
                 ))}
-            </section>
+            </ul>
+            <div>
+                <label>
+                    Task:
+                    <input
+                        type="text"
+                        name="text"
+                        value={newTask.text}
+                        onChange={handleChange}
+                    />
+                </label>
+                <label>
+                    Details:
+                    <input
+                        type="text"
+                        name="details"
+                        value={newTask.details}
+                        onChange={handleChange}
+                    />
+                </label>
+                <button onClick={handleAddTask}>Add Task</button>
+            </div>
         </div>
-    )
-}
+    );
+};
 
-export default Tasklist;
+export default TaskList;
